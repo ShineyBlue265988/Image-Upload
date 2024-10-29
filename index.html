@@ -1,20 +1,77 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>File upload demo</title>
-  </head>
-  <body>
-    <form
-      id="form"
-      enctype="multipart/form-data"
-      action="/upload"
-      method="POST"
-    >
-      <input class="input file-input" type="file" name="file" multiple />
-      <button class="button" type="submit">Submit</button>
-    </form>
-  </body>
+<html>
+<head>
+    <title>File Upload</title>
+    <style>
+        .upload-container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            text-align: center;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .progress {
+            background-color: #cce5ff;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <h2>Upload Your Images</h2>
+        <p>Select JPEG or PNG files (max 1MB each)</p>
+        <form id="uploadForm" enctype="multipart/form-data" method="post" action="/upload">
+            <input type="file" name="file" multiple accept="image/jpeg,image/png" />
+            <br><br>
+            <input type="submit" value="Upload Files" />
+        </form>
+        <div id="status"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('uploadForm');
+        const status = document.getElementById('status');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            status.className = 'progress';
+            status.textContent = 'Uploading your files...';
+
+            fetch('/upload', {
+                method: 'POST',
+                body: new FormData(form)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+                return response.text();
+            })
+            .then(data => {
+                // status.className = 'success';
+                status.textContent = data;
+            })
+            .catch(error => {
+                status.className = 'error';
+                status.textContent = error.message;
+            });
+        });
+    </script>
+</body>
 </html>
